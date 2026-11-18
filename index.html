@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{height:auto}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+<title>Thư Gà Chiên</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Mali:wght@400;600&display=swap">
+<style>
+/* Concept: một phong bì hồng pastel đặt giữa trang. Bấm vào thì nắp lật lên, lá thư trượt ra rồi phóng to thành tờ giấy kẻ dòng để đọc. Trái tim trôi lên ở nền. */
+:root {
+  --bg: #FFEAF1;
+  --bg-glow: #FFD0E1;
+  --fg: #6A2742;
+  --muted: #8A4A65;
+  --accent: #C42E66;
+  --pink: #FF9EBC;
+  --heart: #FF8DB0;
+  --env-back: #F4A9C4;
+  --env-front: #FFC9DB;
+  --env-front-2: #FFBBD2;
+  --flap: #FFB0CA;
+  --flap-in: #EE93B3;
+  --seal: #F0457B;
+  --face: #7A2F4D;
+  --blush: #FF7FA6;
+  --paper: #FFFDFC;
+  --paper-ink: #5E2640;
+  --paper-line: #FFD9E5;
+  --btn-bg: #C42E66;
+  --btn-fg: #FFFFFF;
+  --shadow: rgba(160, 50, 100, 0.38);
+  --font-display: "Baloo 2", "Nunito", "Segoe UI", system-ui, sans-serif;
+  --font-hand: "Mali", "Segoe Print", "Comic Sans MS", "Chalkboard SE", cursive;
+  --env-top: 120px;
+  --env-h: 210px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #2A1220;
+    --bg-glow: #4A1E38;
+    --fg: #FFD9E6;
+    --muted: #E0A9BF;
+    --accent: #FF8FB5;
+    --pink: #FFB3CB;
+    --heart: #FF7BA6;
+    --env-back: #8E3B60;
+    --env-front: #C9638D;
+    --env-front-2: #BA5681;
+    --flap: #D875A0;
+    --flap-in: #7A3052;
+    --seal: #FF5C93;
+    --face: #4A1A31;
+    --blush: #FF8FB5;
+    --btn-bg: #FF9DBD;
+    --btn-fg: #3E1128;
+    --shadow: rgba(10, 0, 8, 0.6);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #2A1220;
+  --bg-glow: #4A1E38;
+  --fg: #FFD9E6;
+  --muted: #E0A9BF;
+  --accent: #FF8FB5;
+  --pink: #FFB3CB;
+  --heart: #FF7BA6;
+  --env-back: #8E3B60;
+  --env-front: #C9638D;
+  --env-front-2: #BA5681;
+  --flap: #D875A0;
+  --flap-in: #7A3052;
+  --seal: #FF5C93;
+  --face: #4A1A31;
+  --blush: #FF8FB5;
+  --btn-bg: #FF9DBD;
+  --btn-fg: #3E1128;
+  --shadow: rgba(10, 0, 8, 0.6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background-color: var(--bg);
+  background-image: radial-gradient(120% 60% at 50% -8%, var(--bg-glow), transparent 62%);
+  color: var(--fg);
+  font-family: var(--font-hand);
+  font-size: 16px;
+  padding-block: clamp(24px, 7vh, 72px) 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+/* nền trái tim */
+.bg-hearts { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.bg-heart { position: absolute; bottom: -48px; opacity: 0.45; animation: rise linear infinite; }
+.bg-heart svg, .fx-heart svg { width: 100%; height: 100%; display: block; fill: currentColor; }
+.c1 { color: var(--heart); }
+.c2 { color: var(--pink); }
+.c3 { color: var(--accent); }
+@keyframes rise {
+  0%   { transform: translate(0, 0) rotate(-8deg); }
+  50%  { transform: translate(18px, -60vh) rotate(8deg); }
+  100% { transform: translate(-8px, -120vh) rotate(-6deg); }
+}
+.fx { position: fixed; inset: 0; pointer-events: none; z-index: 30; overflow: hidden; }
+.fx-heart { position: absolute; will-change: transform, opacity; }
+
+.page {
+  position: relative; z-index: 1;
+  width: min(360px, 100%);
+  margin-inline: auto;
+  display: flex; flex-direction: column; align-items: center; gap: 20px;
+}
+
+/* sân khấu phong bì */
+.scene {
+  position: relative;
+  width: min(340px, 100%);
+  height: var(--scene-h, 330px);
+  perspective: 1100px;
+  transition: height 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.head {
+  position: absolute; inset: 0 0 auto 0; height: var(--env-top);
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+  text-align: center; gap: 2px; padding-bottom: 16px;
+  transition: opacity 0.4s; pointer-events: none;
+}
+.scene.open .head { opacity: 0; }
+.eyebrow { margin: 0; font: 600 14px/1.3 var(--font-hand); color: var(--accent); }
+h1 {
+  margin: 0;
+  font: 800 clamp(27px, 8.2vw, 34px)/1.1 var(--font-display);
+  text-wrap: balance; color: var(--fg);
+}
+h1 em { font-style: normal; color: var(--accent); }
+
+.back, .front, .front-b, .hit {
+  position: absolute; left: 0; right: 0; top: var(--env-top); height: var(--env-h);
+}
+.back {
+  z-index: 1; background: var(--env-back); border-radius: 14px;
+  box-shadow: 0 22px 28px -18px var(--shadow); transition: opacity 0.6s;
+}
+.front {
+  z-index: 4; background: var(--env-front); border-radius: 14px;
+  clip-path: polygon(0 0, 50% 55%, 100% 0, 100% 100%, 0 100%); transition: opacity 0.6s;
+}
+.front-b {
+  z-index: 4; background: var(--env-front-2); border-radius: 0 0 14px 14px;
+  clip-path: polygon(0 100%, 50% 55%, 100% 100%); transition: opacity 0.6s;
+}
+.face {
+  position: absolute; z-index: 4; left: 50%; top: calc(var(--env-top) + 148px);
+  width: 64px; height: 32px; margin-left: -32px; pointer-events: none; transition: opacity 0.6s;
+}
+.face svg { width: 100%; height: 100%; display: block; }
+.flap {
+  position: absolute; left: 0; right: 0; top: var(--env-top); height: 120px; z-index: 5;
+  background: var(--flap);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: 50% 0;
+  transition: transform 0.6s cubic-bezier(0.4, 0.1, 0.3, 1), background-color 0.2s 0.25s, z-index 0s 0.3s, opacity 0.6s;
+}
+.scene.open .flap { transform: rotateX(180deg); background: var(--flap-in); z-index: 1; }
+@media (hover: hover) {
+  .scene:not(.open):has(.hit:hover) .flap { transform: rotateX(14deg); }
+}
+.seal {
+  position: absolute; z-index: 6; left: 50%; top: calc(var(--env-top) + 92px);
+  width: 48px; height: 48px; margin-left: -24px; color: var(--seal);
+  pointer-events: none; transition: opacity 0.35s, transform 0.35s;
+  filter: drop-shadow(0 3px 3px var(--shadow));
+}
+.seal svg { width: 100%; height: 100%; display: block; fill: currentColor; animation: beat 1.6s ease-in-out infinite; }
+@keyframes beat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.16); } 30% { transform: scale(1); } 45% { transform: scale(1.1); } }
+.scene.open .seal { opacity: 0; transform: scale(0.4); }
+
+.hit {
+  z-index: 7; border: 0; padding: 0; background: transparent; cursor: pointer;
+  border-radius: 14px; -webkit-tap-highlight-color: transparent;
+}
+.hit:focus-visible, .btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; }
+
+/* lá thư */
+.letter {
+  position: absolute; z-index: 2; left: 4%; right: 4%; top: 140px; height: 170px;
+  background: var(--paper); color: var(--paper-ink); border-radius: 10px; overflow: hidden;
+  box-shadow: 0 6px 18px -6px var(--shadow);
+  transition: top 0.7s cubic-bezier(0.25, 0.8, 0.25, 1), height 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.scene.rise .letter { top: 30px; }
+.scene.read .letter { top: 0; height: var(--paper-h, 170px); }
+.scene.read .back, .scene.read .front, .scene.read .front-b, .scene.read .face, .scene.read .flap { opacity: 0; }
+.scene.read .letter { cursor: pointer; }
+
+/* ảnh polaroid nhô ra khỏi phong bì */
+.polaroid {
+  position: absolute; z-index: 3; margin: 0; width: 104px; padding: 6px 6px 20px;
+  left: calc(100% - 139px); top: 170px;
+  background: #FFFDFC; border-radius: 3px; box-shadow: 0 6px 14px -4px var(--shadow);
+  transform: rotate(-6deg);
+  transition: top 0.7s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.7s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.scene.rise .polaroid { top: 55px; transform: rotate(4deg); }
+.scene.read .polaroid { top: 34px; transform: rotate(6deg); }
+.polaroid img, .snap img { display: block; width: 100%; aspect-ratio: 4 / 5; object-fit: cover; background: var(--env-front); }
+.pheart { position: absolute; bottom: 4px; left: 50%; width: 12px; height: 12px; margin-left: -6px; fill: var(--seal); }
+.tape {
+  position: absolute; top: -9px; left: 50%; width: 46px; height: 17px; margin-left: -23px;
+  background: var(--pink); opacity: 0.85; transform: rotate(-4deg); border-radius: 2px;
+  box-shadow: 0 1px 2px var(--shadow);
+}
+.polaroid .tape { opacity: 0; transition: opacity 0.5s 0.5s; }
+.scene.read .polaroid .tape { opacity: 0.85; }
+
+/* ảnh dán trên lá thư */
+.snap {
+  position: relative; margin: 0; width: 66px; padding: 4px 4px 13px;
+  background: #FFFDFC; border: 1px solid var(--paper-line); border-radius: 3px;
+  box-shadow: 0 3px 7px -2px var(--shadow); transform: rotate(-4deg);
+}
+.snap .tape { top: -6px; width: 26px; height: 10px; margin-left: -13px; }
+.snap .pheart { width: 8px; height: 8px; margin-left: -4px; bottom: 3px; }
+
+.paper-inner { padding: 20px 22px 26px; }
+.paper-top { display: flex; justify-content: flex-start; margin-bottom: 10px; }
+.stamp {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 2px dashed var(--seal); color: var(--seal); border-radius: 6px;
+  padding: 3px 8px 3px 6px; transform: rotate(5deg);
+  font: 800 14px/1 var(--font-display);
+}
+.stamp svg { width: 16px; height: 16px; fill: currentColor; display: block; }
+.msg {
+  --lh: 31px;
+  margin: 0; display: flow-root; font: 400 17px/var(--lh) var(--font-hand); overflow-wrap: anywhere;
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--lh) - 1.5px), var(--paper-line) calc(var(--lh) - 1.5px), var(--paper-line) var(--lh));
+}
+.msg .gap { float: right; width: 104px; height: 148px; margin: 0 0 6px 10px; }
+.foot { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.sign { margin: 0 0 0 auto; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.15; }
+.sign .small { font: 400 15px var(--font-hand); }
+.sign strong {
+  display: inline-flex; align-items: center; gap: 6px;
+  font: 800 26px/1.1 var(--font-display); color: var(--accent);
+  transform: rotate(-3deg); transform-origin: right center;
+}
+.sign strong svg { width: 20px; height: 20px; fill: currentColor; }
+
+.hint { margin: 0; display: flex; align-items: center; gap: 8px; font: 600 16px/1.3 var(--font-hand); color: var(--muted); }
+.hint svg { width: 18px; height: 18px; fill: var(--accent); animation: beat 1.6s ease-in-out infinite; }
+.actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.btn {
+  font: 700 16px/1 var(--font-display); border-radius: 999px; padding: 12px 22px; cursor: pointer;
+  border: 2px solid var(--btn-bg); background: var(--btn-bg); color: var(--btn-fg);
+  transition: transform 0.15s;
+}
+.btn:active { transform: scale(0.96); }
+.btn.ghost { background: transparent; color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="heart" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/></symbol>
+</svg>
+
+<div class="bg-hearts" id="bg-hearts" aria-hidden="true"></div>
+<div class="fx" id="fx" aria-hidden="true"></div>
+
+<main class="page">
+  <section class="scene" id="scene">
+    <div class="head">
+      <p class="eyebrow">19/11 · Ngày Quốc tế Nam giới</p>
+      <h1>Có thư gửi <em>anh iu</em> nè</h1>
+    </div>
+
+    <div class="back"></div>
+
+    <article class="letter" id="letter">
+      <div class="paper-inner" id="paper-inner">
+        <div class="paper-top">
+          <span class="stamp"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#heart"></use></svg>19/11</span>
+        </div>
+        <p class="msg"><span class="gap" aria-hidden="true"></span>Nhân dịp ngày 19/11 em chúc ngừi iu cụa em ngày càng đẹp traiii, khỏe mạnh, gặp nhìu may mắn thuận buồm xuôi gió an khang thịnh vượng vạn sự như ý vui vẻ hạnh phúc bình an :v Phại lun iu em biết chưa kkkk</p>
+        <div class="foot">
+          <figure class="snap">
+            <i class="tape"></i>
+            <img src="photo-cafe.jpg" alt="Ảnh chụp ở quán cà phê">
+            <svg class="pheart" viewBox="0 0 24 24" aria-hidden="true"><use href="#heart"></use></svg>
+          </figure>
+          <p class="sign">
+            <span class="small">Iu anh</span>
+            <strong>Gà chiên <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#heart"></use></svg></strong>
+          </p>
+        </div>
+      </div>
+    </article>
+
+    <figure class="polaroid" id="polaroid">
+      <i class="tape"></i>
+      <img src="photo-selfie.jpg" alt="Ảnh hai đứa chụp trước gương">
+      <svg class="pheart" viewBox="0 0 24 24" aria-hidden="true"><use href="#heart"></use></svg>
+    </figure>
+
+    <div class="front"></div>
+    <div class="front-b"></div>
+    <div class="face" aria-hidden="true">
+      <svg viewBox="0 0 64 32">
+        <ellipse cx="13" cy="19" rx="6" ry="3.4" fill="var(--blush)" opacity="0.7"/>
+        <ellipse cx="51" cy="19" rx="6" ry="3.4" fill="var(--blush)" opacity="0.7"/>
+        <circle cx="23" cy="13" r="3" fill="var(--face)"/>
+        <circle cx="41" cy="13" r="3" fill="var(--face)"/>
+        <path d="M27 19 Q29.5 23 32 19 Q34.5 23 37 19" fill="none" stroke="var(--face)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="flap"></div>
+    <div class="seal" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><use href="#heart"></use><ellipse cx="8" cy="8.2" rx="2.1" ry="1.2" fill="#fff" opacity="0.6" transform="rotate(-30 8 8.2)"/></svg>
+    </div>
+    <button class="hit" id="hit" type="button" aria-label="Mở thư"></button>
+  </section>
+
+  <p class="hint" id="hint">Bấm vào phong bì nha <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#heart"></use></svg></p>
+  <div class="actions" id="actions" hidden>
+    <button class="btn" id="love" type="button">Thả tim</button>
+    <button class="btn ghost" id="close" type="button">Đóng thư lại</button>
+  </div>
+</main>
+
+<script>
+(function () {
+  var reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var scene = document.getElementById('scene');
+  var hit = document.getElementById('hit');
+  var hint = document.getElementById('hint');
+  var actions = document.getElementById('actions');
+  var inner = document.getElementById('paper-inner');
+  var letter = document.getElementById('letter');
+  var bg = document.getElementById('bg-hearts');
+  var fx = document.getElementById('fx');
+  var loveBtn = document.getElementById('love');
+  var closeBtn = document.getElementById('close');
+  var colors = ['c1', 'c2', 'c3'];
+  var state = 'closed';
+  var busy = false;
+
+  function heart(cls) {
+    var s = document.createElement('span');
+    s.className = cls;
+    s.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#heart"></use></svg>';
+    return s;
+  }
+
+  for (var i = 0; i < 18; i++) {
+    var h = heart('bg-heart ' + colors[i % 3]);
+    var size = 14 + Math.random() * 26;
+    h.style.width = size + 'px';
+    h.style.height = size + 'px';
+    h.style.left = (Math.random() * 96) + '%';
+    if (reduce) {
+      h.style.bottom = 'auto';
+      h.style.top = (Math.random() * 92) + '%';
+      h.style.opacity = '0.35';
+    } else {
+      h.style.animationDuration = (14 + Math.random() * 16) + 's';
+      h.style.animationDelay = (-Math.random() * 28) + 's';
+    }
+    bg.appendChild(h);
+  }
+
+  function burst(x, y, n) {
+    if (reduce) return;
+    for (var k = 0; k < n; k++) {
+      var el = heart('fx-heart ' + colors[k % 3]);
+      var sz = 14 + Math.random() * 18;
+      el.style.width = sz + 'px';
+      el.style.height = sz + 'px';
+      el.style.left = (x - sz / 2) + 'px';
+      el.style.top = (y - sz / 2) + 'px';
+      fx.appendChild(el);
+      var dx = (Math.random() - 0.5) * 320;
+      var dy = -(80 + Math.random() * 260);
+      var rot = (Math.random() - 0.5) * 60;
+      var anim = el.animate([
+        { transform: 'translate(0px,0px) scale(0.3) rotate(0deg)', opacity: 0 },
+        { opacity: 1, offset: 0.15 },
+        { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(1) rotate(' + rot + 'deg)', opacity: 0 }
+      ], { duration: 1100 + Math.random() * 900, easing: 'cubic-bezier(0.2,0.7,0.3,1)', fill: 'forwards' });
+      anim.onfinish = (function (node) { return function () { node.remove(); }; })(el);
+    }
+  }
+
+  function applySize() {
+    var ph = inner.offsetHeight;
+    scene.style.setProperty('--paper-h', ph + 'px');
+    scene.style.setProperty('--scene-h', ph + 'px');
+  }
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(function () { if (state === 'read') applySize(); }).observe(inner);
+  }
+
+  function openCard() {
+    if (busy || state !== 'closed') return;
+    busy = true;
+    hit.disabled = true;
+    hint.hidden = true;
+    scene.classList.add('open');
+    setTimeout(function () { scene.classList.add('rise'); }, reduce ? 0 : 450);
+    setTimeout(function () {
+      applySize();
+      scene.classList.add('read');
+      state = 'read';
+      hit.hidden = true;
+      actions.hidden = false;
+      busy = false;
+      var r = scene.getBoundingClientRect();
+      burst(r.left + r.width / 2, r.top + 200, 18);
+      try { closeBtn.focus({ preventScroll: true }); } catch (e) {}
+    }, reduce ? 0 : 1100);
+  }
+
+  function closeCard() {
+    if (busy || state !== 'read') return;
+    busy = true;
+    actions.hidden = true;
+    scene.classList.remove('read');
+    scene.style.removeProperty('--scene-h');
+    scene.style.removeProperty('--paper-h');
+    hit.hidden = false;
+    setTimeout(function () { scene.classList.remove('rise'); }, reduce ? 0 : 700);
+    setTimeout(function () {
+      scene.classList.remove('open');
+      state = 'closed';
+      busy = false;
+      hit.disabled = false;
+      hint.hidden = false;
+      try { hit.focus({ preventScroll: true }); } catch (e) {}
+    }, reduce ? 0 : 1250);
+  }
+
+  hit.addEventListener('click', openCard);
+  closeBtn.addEventListener('click', closeCard);
+  loveBtn.addEventListener('click', function () {
+    var r = loveBtn.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top, 14);
+  });
+  letter.addEventListener('click', function (e) {
+    if (state === 'read') burst(e.clientX, e.clientY, 8);
+  });
+})();
+</script>
+
+</body>
+</html>
